@@ -11,7 +11,7 @@ cleanup() {
   rm -f "$RESIZED"
   rm -f "$IMAGE"
 }
-# trap cleanup EXIT
+trap cleanup EXIT
 
 if [[ ! -f "$IMAGE" ]]; then
   notify-send -i dialog-error "OCR Error" "No image file received"
