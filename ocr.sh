@@ -11,7 +11,7 @@ cleanup() {
   rm -f "$RESIZED"
   rm -f "$IMAGE"
 }
-trap cleanup EXIT
+# trap cleanup EXIT
 
 if [[ ! -f "$IMAGE" ]]; then
   notify-send -i dialog-error "OCR Error" "No image file received"
@@ -20,7 +20,8 @@ fi
 
 # Resize for better OCR
 RESIZED="/tmp/ocr_resized_$$.png"
-magick "$IMAGE" -resize 400% "$RESIZED"
+#magick "$IMAGE" -resize 400% "$RESIZED"
+convert "$IMAGE" -resize 400% "$RESIZED"
 
 # Perform OCR
 OCR_OUTPUT=$(tesseract --psm 6 -l "$LANG" "$RESIZED" - 2>&1)
@@ -34,10 +35,8 @@ fi
 # Normalize line endings
 TEXT=$(echo "$OCR_OUTPUT" | sed "s/\$/${CR}/")
 
-# Copy to clipboard
-if command -v wl-copy &>/dev/null; then
-  echo -n "$TEXT" | wl-copy
-elif command -v xclip &>/dev/null; then
+# Copy to clipboard (use xclip if available, otherwise notify error)
+if command -v xclip &>/dev/null; then
   echo -n "$TEXT" | xclip -selection clipboard
 else
   notify-send -i dialog-error "OCR Error" "No clipboard tool found"
